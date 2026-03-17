@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEMA Rules Every NRI Property Investor Must Know | VittaBridge</title>
+  <meta name="description" content="Understanding FEMA regulations is non-negotiable for NRIs buying property in India. Here is what you need to know before you invest." />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="icon" type="image/png" href="../images/favicon.png" />
+  <style>
+    .post-hero { padding: 5rem 0 3rem; border-bottom: 1px solid rgba(184,150,62,0.1); }
+    .post-layout { display: grid; grid-template-columns: 1fr 320px; gap: 4rem; align-items: start; padding: 4rem 0; }
+    .post-body h2 { font-size: 1.6rem; margin: 2.5rem 0 1rem; color: var(--cream); }
+    .post-body h3 { font-size: 1.2rem; margin: 2rem 0 0.75rem; color: var(--gold-light); }
+    .post-body p { font-size: 0.95rem; line-height: 1.9; opacity: 0.82; margin-bottom: 1.25rem; }
+    .post-body ul, .post-body ol { padding-left: 1.5rem; margin-bottom: 1.5rem; }
+    .post-body li { font-size: 0.95rem; line-height: 1.8; opacity: 0.8; margin-bottom: 0.4rem; }
+    .post-body li::marker { color: var(--gold); }
+    .post-callout { background: var(--green-deeper); border-left: 3px solid var(--gold); padding: 1.5rem 2rem; margin: 2rem 0; }
+    .post-callout p { margin: 0; font-style: italic; }
+    .post-sidebar { position: sticky; top: 100px; }
+    .sidebar-card { background: var(--green-deeper); border: 1px solid rgba(184,150,62,0.12); padding: 2rem; margin-bottom: 1.5rem; }
+    .sidebar-card h4 { font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem; }
+    .related-post { padding: 0.75rem 0; border-bottom: 1px solid rgba(184,150,62,0.08); font-size: 0.85rem; }
+    .related-post:last-child { border-bottom: none; }
+    .related-post a { color: var(--cream); opacity: 0.7; line-height: 1.5; }
+    .related-post a:hover { opacity: 1; color: var(--gold); }
+    .post-meta-bar { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; font-size: 0.75rem; letter-spacing: 1.5px; opacity: 0.5; }
+    .fema-table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.88rem; }
+    .fema-table th { background: var(--green-mid); color: var(--gold); font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; padding: 0.85rem 1rem; text-align: left; border: 1px solid rgba(184,150,62,0.15); }
+    .fema-table td { padding: 0.85rem 1rem; border: 1px solid rgba(184,150,62,0.1); color: var(--cream); opacity: 0.8; vertical-align: top; }
+    .fema-table tr:hover td { background: rgba(184,150,62,0.03); }
+    @media (max-width: 900px) { .post-layout { grid-template-columns: 1fr; } .post-sidebar { position: static; } .fema-table { font-size: 0.78rem; } }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="container">
+      <div class="topbar-inner">
+        <ul class="topbar-contact">
+          <li><a href="mailto:Sri@vittabridge.com">✉ Sri@vittabridge.com</a></li>
+          <li><a href="tel:+919740311355">✆ +91 97403 11355</a></li>
+        </ul>
+        <div class="topbar-social">
+          <a href="https://linkedin.com/company/vittabridge" target="_blank">LINKEDIN</a>
+          <a href="https://wa.me/919740311355" target="_blank">WHATSAPP</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="../index.html" class="logo">
+          <svg class="logo-mark" viewBox="0 0 100 100" fill="none">
+            <polygon points="50,4 90,50 50,96 10,50" fill="none" stroke="#b8963e" stroke-width="2" opacity="0.8"/>
+            <polygon points="50,24 70,50 50,76 30,50" fill="url(#gdf1)"/>
+            <defs><linearGradient id="gdf1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f0d98a"/><stop offset="100%" stop-color="#a07828"/></linearGradient></defs>
+            <polygon points="50,1 54,4 50,7 46,4" fill="#b8963e"/>
+            <polygon points="93,47 96,50 93,53 90,50" fill="#b8963e"/>
+            <polygon points="50,93 54,96 50,99 46,96" fill="#b8963e"/>
+            <polygon points="7,47 10,50 7,53 4,50" fill="#b8963e"/>
+            <text x="50" y="58" font-family="Georgia,serif" font-weight="700" font-size="32" fill="#0d2820" text-anchor="middle">V</text>
+          </svg>
+          <div class="logo-text">
+            <span class="logo-name">VittaBridge</span>
+            <span class="logo-tagline">Real Estate Advisory</span>
+          </div>
+        </a>
+        <nav>
+          <ul class="nav">
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">About Us</a></li>
+            <li><a href="../services.html">Services</a></li>
+            <li><a href="../insights.html" class="active">Insights</a></li>
+            <li><a href="../contact.html" class="nav-cta">Contact Us</a></li>
+          </ul>
+        </nav>
+        <div class="hamburger"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="post-hero">
+    <div class="container">
+      <a href="../insights.html" style="font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); opacity:0.7;">← Back to Insights</a>
+      <div style="margin-top:1.5rem;">
+        <span class="section-label">Legal & Compliance</span>
+        <h1 style="max-width:800px; margin-top:0.5rem;">FEMA Rules Every NRI Property Investor Must Know</h1>
+        <div class="post-meta-bar">
+          <span>7 min read</span>
+          <span>·</span>
+          <span>VittaBridge Advisory</span>
+          <span>·</span>
+          <span>Legal & Compliance</span>
+        </div>
+        <div class="divider"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="post-layout">
+      <article class="post-body">
+
+        <p>The Foreign Exchange Management Act (FEMA) governs all cross-border financial transactions involving Indians and foreign nationals. For NRIs looking to invest in Indian real estate, FEMA is not optional reading — it is the legal foundation of every transaction you will make.</p>
+
+        <p>Violations, even unintentional ones, can result in penalties of up to three times the amount involved. Getting this right from the start is therefore not just good practice — it is essential.</p>
+
+        <h2>Who is an NRI Under FEMA?</h2>
+        <p>FEMA defines a Non-Resident Indian as an Indian citizen who resides outside India. The residential status under FEMA is determined by the number of days spent in India during a financial year — not by citizenship or passport. Specifically:</p>
+        <ul>
+          <li>A person who has been outside India for 182 days or more during the preceding financial year is classified as a non-resident for FEMA purposes.</li>
+          <li>Persons of Indian Origin (PIOs) and Overseas Citizens of India (OCIs) have similar — though not identical — rights under FEMA as NRIs for property transactions.</li>
+        </ul>
+
+        <div class="post-callout">
+          <p>Your FEMA status is determined by days spent in India — not by which passport you hold. An Indian citizen living in Dubai for 8 months a year is an NRI under FEMA even if they hold only an Indian passport.</p>
+        </div>
+
+        <h2>What Property Can NRIs Buy?</h2>
+        <p>Under FEMA, NRIs can freely purchase the following types of immovable property in India without RBI approval:</p>
+        <ul>
+          <li>Residential property (apartments, villas, houses)</li>
+          <li>Commercial property (offices, shops, warehouses)</li>
+        </ul>
+        <p>NRIs cannot purchase agricultural land, plantation property, or farmhouses in India without specific RBI approval. This restriction applies regardless of how the property is marketed or used.</p>
+
+        <h2>How Can NRIs Fund Property Purchases?</h2>
+        <p>This is where many NRIs make costly mistakes. FEMA strictly governs the source of funds used for property purchases. Permitted sources include:</p>
+        <ul>
+          <li>Funds remitted from abroad through normal banking channels (SWIFT/wire transfer)</li>
+          <li>Funds held in NRE (Non-Resident External) accounts</li>
+          <li>Funds held in FCNR (Foreign Currency Non-Resident) accounts</li>
+          <li>Funds in NRO (Non-Resident Ordinary) accounts — subject to restrictions on repatriation</li>
+        </ul>
+
+        <div class="post-callout">
+          <p>Cash payments are not permitted for NRI property purchases under any circumstances — regardless of amount. All transactions must go through the banking system with a clear audit trail.</p>
+        </div>
+
+        <h2>NRE vs NRO Account — Why It Matters for Property</h2>
+        <table class="fema-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>NRE Account</th>
+              <th>NRO Account</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Source of funds</td>
+              <td>Foreign earnings only</td>
+              <td>India-sourced income (rent, dividends etc.)</td>
+            </tr>
+            <tr>
+              <td>Currency</td>
+              <td>Held in INR, funded in foreign currency</td>
+              <td>INR</td>
+            </tr>
+            <tr>
+              <td>Repatriation of principal</td>
+              <td>Freely repatriable</td>
+              <td>Up to USD 1 million per year (with CA certificate)</td>
+            </tr>
+            <tr>
+              <td>Tax on interest</td>
+              <td>Tax-free in India</td>
+              <td>Taxable in India (TDS applies)</td>
+            </tr>
+            <tr>
+              <td>Best used for</td>
+              <td>Property purchases where you want full repatriation later</td>
+              <td>Managing rental income and India-sourced expenses</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Repatriation of Sale Proceeds</h2>
+        <p>When an NRI sells a property in India and wishes to repatriate the proceeds, FEMA rules are specific:</p>
+        <ul>
+          <li>Repatriation is permitted up to the original amount invested through foreign exchange or NRE/FCNR account funds.</li>
+          <li>The amount repatriated cannot exceed two residential properties in a lifetime — though this restriction applies specifically to NRIs who acquired property as residents before becoming NRIs.</li>
+          <li>Capital gains can be repatriated after payment of applicable taxes.</li>
+          <li>A Chartered Accountant's certificate (Form 15CB) and self-declaration (Form 15CA) are required before remitting funds abroad.</li>
+        </ul>
+
+        <h2>Home Loans for NRIs</h2>
+        <p>NRIs can take home loans from Indian banks and housing finance companies. Key points:</p>
+        <ul>
+          <li>Loan repayments must come from NRE/NRO accounts or from remittances from abroad.</li>
+          <li>Local rental income from the property can be used for EMI repayment.</li>
+          <li>Loan proceeds cannot be repatriated — they must be used for the property in India.</li>
+        </ul>
+
+        <h2>Power of Attorney — FEMA Implications</h2>
+        <p>NRIs frequently use a Power of Attorney (POA) to authorise a trusted person in India to complete transactions on their behalf. Under FEMA and Indian law, the POA must be:</p>
+        <ul>
+          <li>Executed before a Notary Public in the country of residence</li>
+          <li>Apostilled (for Hague Convention countries) or attested by the Indian Consulate/Embassy</li>
+          <li>Registered at the Sub-Registrar's office in India before use for property transactions</li>
+        </ul>
+
+        <div class="post-callout">
+          <p>A POA that has not been properly apostilled and registered in India is legally invalid for property transactions. This is one of the most common and costly errors in NRI property deals.</p>
+        </div>
+
+        <h2>TDS on Property Purchase by NRIs</h2>
+        <p>When an NRI sells property, the buyer is required to deduct TDS at source. The applicable rates are significantly higher than for resident Indian sellers — typically 20–30% depending on the holding period. NRIs should factor this into their financial planning and explore whether a lower deduction certificate from the Income Tax department is warranted.</p>
+
+        <h2>How VittaBridge Helps</h2>
+        <p>Navigating FEMA compliance requires coordinated advice from real estate, legal and financial professionals. Our advisory service ensures every transaction is structured correctly from the outset — covering account type, fund routing, POA execution and tax implications — so you avoid penalties and complications at every stage.</p>
+
+        <div style="margin-top:2.5rem; padding:2rem; border:1px solid rgba(184,150,62,0.2); background:var(--green-deeper);">
+          <div style="font-size:0.7rem; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:1rem;">Get FEMA-Compliant Advice</div>
+          <p style="font-size:0.9rem; margin-bottom:1.5rem;">Every VittaBridge client engagement includes FEMA compliance review as standard. Book a free consultation to understand how the rules apply to your specific situation.</p>
+          <a href="../contact.html" class="btn btn-primary">Book a Free Consultation</a>
+        </div>
+
+      </article>
+
+      <aside class="post-sidebar">
+        <div class="sidebar-card">
+          <h4>Quick Contact</h4>
+          <p style="font-size:0.82rem; opacity:0.65; margin-bottom:1.2rem;">Have a question about FEMA compliance for your property investment?</p>
+          <a href="../contact.html" class="btn btn-primary" style="display:block; text-align:center; width:100%;">Talk to Us</a>
+          <a href="https://wa.me/919740311355" target="_blank" class="btn btn-outline" style="display:block; text-align:center; width:100%; margin-top:0.75rem;">WhatsApp</a>
+        </div>
+        <div class="sidebar-card">
+          <h4>Related Insights</h4>
+          <div class="related-post"><a href="how-nris-can-buy-bank-auction-properties.html">How NRIs Can Buy Bank Auction Properties in India</a></div>
+          <div class="related-post"><a href="buy-property-india-from-abroad.html">Step-by-Step: How to Buy Property in India from Abroad</a></div>
+          <div class="related-post"><a href="power-of-attorney-nri.html">Power of Attorney for NRIs — What You Must Get Right</a></div>
+          <div class="related-post"><a href="tds-nri-property-purchase.html">TDS on Property Purchase — A Complete NRI Guide</a></div>
+        </div>
+        <div class="sidebar-card">
+          <h4>Categories</h4>
+          <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem;">
+            <a href="../insights.html" style="font-size:0.78rem; color:var(--cream); opacity:0.6; padding:0.4rem 0; border-bottom:1px solid rgba(184,150,62,0.06);">NRI Buyer's Guide</a>
+            <a href="../insights.html" style="font-size:0.78rem; color:var(--cream); opacity:0.6; padding:0.4rem 0; border-bottom:1px solid rgba(184,150,62,0.06);">Auction Properties 101</a>
+            <a href="../insights.html" style="font-size:0.78rem; color:var(--gold); opacity:1; padding:0.4rem 0; border-bottom:1px solid rgba(184,150,62,0.06);">Legal & Compliance</a>
+            <a href="../insights.html" style="font-size:0.78rem; color:var(--cream); opacity:0.6; padding:0.4rem 0; border-bottom:1px solid rgba(184,150,62,0.06);">Tax & Finance</a>
+            <a href="../insights.html" style="font-size:0.78rem; color:var(--cream); opacity:0.6; padding:0.4rem 0;">Market Insights</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="logo" style="margin-bottom:1rem; display:inline-flex;">
+            <svg width="36" height="36" viewBox="0 0 100 100" fill="none">
+              <polygon points="50,4 90,50 50,96 10,50" fill="none" stroke="#b8963e" stroke-width="2"/>
+              <polygon points="50,24 70,50 50,76 30,50" fill="url(#gdfx)"/>
+              <defs><linearGradient id="gdfx" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f0d98a"/><stop offset="100%" stop-color="#a07828"/></linearGradient></defs>
+              <text x="50" y="58" font-family="Georgia,serif" font-weight="700" font-size="32" fill="#0d2820" text-anchor="middle">V</text>
+            </svg>
+            <span style="font-family:var(--font-heading); font-size:1.2rem; color:var(--cream); margin-left:0.75rem; align-self:center;">VittaBridge</span>
+          </a>
+          <p>Your trusted bridge to Indian real estate. Specialists in NRI investments and auction properties across India.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <ul class="footer-links">
+            <li><a href="../about.html">About Us</a></li>
+            <li><a href="../services.html">Services</a></li>
+            <li><a href="../insights.html">Insights</a></li>
+            <li><a href="../contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="../services.html#nri">NRI Buyer Advisory</a></li>
+            <li><a href="../services.html#auction">Auction Properties</a></li>
+            <li><a href="../services.html#management">Property Management</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <div class="footer-contact-item">✉ Sri@vittabridge.com</div>
+          <div class="footer-contact-item">✆ +91 97403 11355</div>
+          <div class="footer-contact-item">📍 Bengaluru, India</div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 VittaBridge. All rights reserved.</span>
+        <span>NRI & Auction Specialists · India</span>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/919740311355" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>
