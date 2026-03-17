@@ -7,6 +7,19 @@
   <meta name="description" content="Get in touch with VittaBridge — whether you are an NRI buyer, property owner or looking for a partnership." />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="icon" type="image/png" href="images/favicon.png" />
+
+  <style>
+    .success-banner { display:none; background: var(--green-mid); border: 1px solid rgba(184,150,62,0.4); padding: 1.2rem 2rem; margin-bottom: 2rem; color: var(--cream); font-size: 0.88rem; letter-spacing: 1px; }
+    .success-banner span { color: var(--gold); font-weight: 600; }
+  </style>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.location.search.includes('success=true')) {
+        const banner = document.getElementById('success-banner');
+        if (banner) { banner.style.display = 'block'; window.scrollTo({top: banner.offsetTop - 100, behavior: 'smooth'}); }
+      }
+    });
+  </script>
 </head>
 <body>
 
@@ -96,7 +109,7 @@
             <div class="contact-info-icon">📍</div>
             <div>
               <div style="font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:0.3rem;">Location</div>
-              <span style="color:var(--cream); font-size:0.9rem; opacity:0.75;">India</span>
+              <span style="color:var(--cream); font-size:0.9rem; opacity:0.75;">Bengaluru, India</span>
             </div>
           </div>
           <div class="contact-info-item" style="border:none;">
@@ -117,6 +130,9 @@
 
         <!-- RIGHT: Forms -->
         <div id="forms">
+          <div id="success-banner" class="success-banner">
+            ✓ <span>Message received!</span> We will get back to you at Sri@vittabridge.com within 24 hours.
+          </div>
           <div class="form-tabs">
             <button class="form-tab active" data-tab="buyer-form">I'm a Buyer</button>
             <button class="form-tab" data-tab="owner-form">I'm a Property Owner</button>
@@ -126,8 +142,12 @@
           <!-- NOTE: Replace YOUR_FORM_ID, YOUR_FORM_ID_2, YOUR_FORM_ID_3 with real Formspree IDs after setting up at formspree.io -->
           <div class="form-panel active" id="buyer-form">
             <p style="font-size:0.85rem; opacity:0.6; margin-bottom:2rem;">Looking to invest in Indian real estate? Tell us about yourself and your goals — we will get back to you within 24 hours.</p>
-            <form class="vb-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" data-setup-needed="true">
+            <form class="vb-form" action="https://api.web3forms.com/submit" method="POST">
               <input type="hidden" name="form_type" value="Buyer Enquiry" />
+              <input type="hidden" name="access_key" value="49e018c3-f5b9-4817-aa64-f6769af79864" />
+              <input type="hidden" name="subject" value="New Buyer Enquiry — VittaBridge" />
+              <input type="hidden" name="redirect" value="https://vittabridge.pages.dev/contact.html?success=true" />
+              <input type="hidden" name="from_name" value="VittaBridge Website" />
               <div class="form-row">
                 <div class="form-group">
                   <label>Full Name *</label>
@@ -203,8 +223,12 @@
           <!-- OWNER FORM -->
           <div class="form-panel" id="owner-form">
             <p style="font-size:0.85rem; opacity:0.6; margin-bottom:2rem;">Own a property and looking for the right buyer or advisory? Share your details and we will explore how we can help.</p>
-            <form class="vb-form" action="https://formspree.io/f/YOUR_FORM_ID_2" method="POST">
+            <form class="vb-form" action="https://api.web3forms.com/submit" method="POST">
               <input type="hidden" name="form_type" value="Property Owner Enquiry" />
+              <input type="hidden" name="access_key" value="49e018c3-f5b9-4817-aa64-f6769af79864" />
+              <input type="hidden" name="subject" value="New Property Owner Enquiry — VittaBridge" />
+              <input type="hidden" name="redirect" value="https://vittabridge.pages.dev/contact.html?success=true" />
+              <input type="hidden" name="from_name" value="VittaBridge Website" />
               <div class="form-row">
                 <div class="form-group">
                   <label>Full Name *</label>
@@ -270,8 +294,12 @@
           <!-- PARTNER FORM -->
           <div class="form-panel" id="partner-form">
             <p style="font-size:0.85rem; opacity:0.6; margin-bottom:2rem;">Interested in collaborating with VittaBridge? We work with legal firms, CAs, financial advisors and NRI community organisations.</p>
-            <form class="vb-form" action="https://formspree.io/f/YOUR_FORM_ID_3" method="POST">
+            <form class="vb-form" action="https://api.web3forms.com/submit" method="POST">
               <input type="hidden" name="form_type" value="Partnership Enquiry" />
+              <input type="hidden" name="access_key" value="49e018c3-f5b9-4817-aa64-f6769af79864" />
+              <input type="hidden" name="subject" value="New Partnership Enquiry — VittaBridge" />
+              <input type="hidden" name="redirect" value="https://vittabridge.pages.dev/contact.html?success=true" />
+              <input type="hidden" name="from_name" value="VittaBridge Website" />
               <div class="form-row">
                 <div class="form-group">
                   <label>Full Name *</label>
