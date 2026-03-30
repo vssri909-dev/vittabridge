@@ -12,12 +12,19 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById(tab.dataset.tab)?.classList.add('active');
     });
   });
+  function applyFilter(cat) {
+    document.querySelectorAll('.category-filter').forEach(f => f.classList.remove('active'));
+    const btn = document.querySelector(`.category-filter[data-category="${cat}"]`);
+    if (btn) btn.classList.add('active');
+    document.querySelectorAll('.insight-card').forEach(card => { card.style.display = (cat === 'all' || card.dataset.category === cat) ? '' : 'none'; });
+  }
   document.querySelectorAll('.category-filter').forEach(filter => {
     filter.addEventListener('click', () => {
-      document.querySelectorAll('.category-filter').forEach(f => f.classList.remove('active'));
-      filter.classList.add('active');
       const cat = filter.dataset.category;
-      document.querySelectorAll('.insight-card').forEach(card => { card.style.display = (cat === 'all' || card.dataset.category === cat) ? '' : 'none'; });
+      history.replaceState(null, '', cat === 'all' ? location.pathname : '#' + cat);
+      applyFilter(cat);
     });
   });
+  const hash = location.hash.replace('#', '');
+  if (hash) applyFilter(hash);
 });
