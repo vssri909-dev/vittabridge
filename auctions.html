@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bengaluru Auction Properties — Curated by VittaBridge | Bank Auction Listings</title>
+  <meta name="description" content="Curated bank auction properties in Bengaluru. SBI, Karnataka Bank, PNB and more — vetted and presented by VittaBridge NRI advisory specialists." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="canonical" href="https://vittabridge.com/auctions.html" />
+  <meta property="og:title" content="Bengaluru Bank Auction Properties — VittaBridge" />
+  <meta property="og:description" content="Curated bank auction properties in Bengaluru — SBI, Karnataka Bank, PNB and more. Vetted by VittaBridge NRI advisory specialists." />
+  <meta property="og:url" content="https://vittabridge.com/auctions.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://vittabridge.com/images/og-vittabridge.jpg" />
+  <meta property="og:site_name" content="VittaBridge" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  <script src="js/analytics.js"></script>
+  <style>
+
+    /* ── Page hero ─────────────────────────────── */
+    .auction-hero {
+      padding: 4rem 0 3rem;
+      border-bottom: 1px solid rgba(184,150,62,0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    .auction-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 80% 50%, rgba(184,150,62,0.05) 0%, transparent 60%);
+    }
+
+    /* ── Disclaimer banner ─────────────────────── */
+    .disclaimer {
+      background: var(--green-deeper);
+      border: 1px solid rgba(184,150,62,0.15);
+      border-left: 3px solid var(--gold);
+      padding: 1rem 1.5rem;
+      margin: 2rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      font-size: 0.82rem;
+      color: var(--cream);
+      opacity: 0.8;
+      line-height: 1.6;
+    }
+    .disclaimer strong { color: var(--gold); opacity: 1; }
+
+    /* ── Stats bar ─────────────────────────────── */
+    .auction-stats {
+      display: flex;
+      gap: 2.5rem;
+      align-items: center;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid rgba(184,150,62,0.1);
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .auction-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      color: var(--cream);
+      opacity: 0.6;
+    }
+    .auction-stat strong {
+      color: var(--gold);
+      font-size: 1.1rem;
+      font-family: var(--font-heading);
+      opacity: 1;
+    }
+    .updated-badge {
+      margin-left: auto;
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.35;
+    }
+
+    /* ── Filter bar ────────────────────────────── */
+    .auction-filters {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      align-items: center;
+    }
+    .auction-filter-label {
+      font-size: 0.68rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.4;
+      margin-right: 0.5rem;
+    }
+    .af-btn {
+      padding: 0.4rem 1.1rem;
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: 1px solid rgba(184,150,62,0.2);
+      color: var(--cream);
+      opacity: 0.55;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: none;
+      font-family: var(--font-body);
+    }
+    .af-btn:hover, .af-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      opacity: 1;
+    }
+
+    /* ── Listings grid ─────────────────────────── */
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    /* ── Listing card ──────────────────────────── */
+    .listing-card {
+      background: var(--green-deeper);
+      border: 1px solid rgba(184,150,62,0.1);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .listing-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      transform: scaleX(0);
+      transition: all 0.3s ease;
+    }
+    .listing-card:hover::before { transform: scaleX(1); }
+    .listing-card:hover {
+      border-color: rgba(184,150,62,0.25);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    /* Urgent badge */
+    .card-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 0.58rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      font-family: var(--font-body);
+      z-index: 2;
+    }
+    .badge-urgent {
+      background: rgba(220, 80, 60, 0.85);
+      color: white;
+    }
+    .badge-new {
+      background: rgba(184,150,62,0.85);
+      color: var(--green-dark);
+      font-weight: 600;
+    }
+    .badge-upcoming {
+      background: rgba(19,46,36,0.95);
+      color: var(--gold);
+      border: 1px solid rgba(184,150,62,0.3);
+    }
+
+    /* Card header */
+    .card-header {
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid rgba(184,150,62,0.08);
+    }
+    .card-type-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-type {
+      font-size: 0.62rem;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .card-type-dot {
+      width: 3px;
+      height: 3px;
+      background: var(--gold);
+      border-radius: 50%;
+      opacity: 0.5;
+    }
+    .card-subtype {
+      font-size: 0.62rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.4;
+    }
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      color: var(--cream);
+      line-height: 1.35;
+      margin-bottom: 0.4rem;
+    }
+    .card-location {
+      font-size: 0.78rem;
+      color: var(--cream);
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Card body */
+    .card-body {
+      padding: 1.2rem 1.5rem;
+      flex: 1;
+    }
+    .card-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .card-price-label {
+      font-size: 0.62rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.45;
+    }
+    .card-price {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .card-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .card-detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .card-detail-label {
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.35;
+    }
+    .card-detail-value {
+      font-size: 0.82rem;
+      color: var(--cream);
+      opacity: 0.75;
+    }
+    .card-detail-value.highlight {
+      color: var(--gold-light);
+      opacity: 1;
+      font-weight: 600;
+    }
+
+    /* VB Assessment */
+    .card-assessment {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      background: rgba(184,150,62,0.05);
+      border-left: 2px solid rgba(184,150,62,0.3);
+      font-size: 0.78rem;
+      color: var(--cream);
+      opacity: 0.72;
+      line-height: 1.6;
+      font-style: italic;
+    }
+    .card-assessment strong {
+      color: var(--gold);
+      font-style: normal;
+      font-size: 0.62rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 0.3rem;
+      opacity: 1;
+    }
+
+    /* Card footer */
+    .card-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(184,150,62,0.08);
+      display: flex;
+      gap: 0.75rem;
+    }
+    .card-cta-primary {
+      flex: 1;
+      background: var(--gold);
+      color: var(--green-dark);
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      padding: 0.65rem 0.5rem;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: all 0.3s ease;
+    }
+    .card-cta-primary:hover {
+      background: var(--gold-light);
+      color: var(--green-dark);
+    }
+    .card-cta-secondary {
+      flex: 1;
+      background: transparent;
+      color: var(--gold);
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: 1px solid rgba(184,150,62,0.3);
+      cursor: pointer;
+      padding: 0.65rem 0.5rem;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: all 0.3s ease;
+    }
+    .card-cta-secondary:hover {
+      border-color: var(--gold);
+      background: rgba(184,150,62,0.06);
+    }
+
+    /* ── Bottom CTA ────────────────────────────── */
+    .auction-bottom-cta {
+      background: var(--green-deeper);
+      border: 1px solid rgba(184,150,62,0.15);
+      padding: 3rem;
+      text-align: center;
+      margin-bottom: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .auction-bottom-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(184,150,62,0.05) 0%, transparent 70%);
+    }
+    .auction-bottom-cta h3 {
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+    .auction-bottom-cta p {
+      font-size: 0.9rem;
+      opacity: 0.65;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+      position: relative;
+    }
+    .auction-cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    /* ── Register interest bar ─────────────────── */
+    .register-bar {
+      background: rgba(184,150,62,0.08);
+      border: 1px solid rgba(184,150,62,0.15);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .register-bar-text h4 {
+      font-size: 0.95rem;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+    }
+    .register-bar-text p {
+      font-size: 0.8rem;
+      opacity: 0.55;
+      margin: 0;
+    }
+
+    /* ── No listings message ───────────────────── */
+    .no-listings {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--cream);
+      opacity: 0.45;
+      grid-column: 1 / -1;
+    }
+
+    /* ── Responsive ────────────────────────────── */
+    @media (max-width: 1024px) {
+      .listings-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .listings-grid { grid-template-columns: 1fr; }
+      .auction-stats { gap: 1.5rem; }
+      .updated-badge { width: 100%; margin-left: 0; }
+      .auction-bottom-cta { padding: 2rem 1.5rem; }
+      .register-bar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="container">
+      <div class="topbar-inner">
+        <ul class="topbar-contact">
+          <li><a href="mailto:Sri@vittabridge.com">✉ Sri@vittabridge.com</a></li>
+          <li><a href="tel:+919740311355">✆ +91 97403 11355</a></li>
+        </ul>
+        <div class="topbar-social">
+          <a href="https://linkedin.com/company/vittabridge" target="_blank">LINKEDIN</a>
+          <a href="https://wa.me/919740311355" target="_blank">WHATSAPP</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="logo">
+          <svg class="logo-mark" viewBox="0 0 100 100" fill="none">
+            <polygon points="50,4 90,50 50,96 10,50" fill="none" stroke="#b8963e" stroke-width="2" opacity="0.8"/>
+            <polygon points="50,24 70,50 50,76 30,50" fill="url(#gdau)"/>
+            <defs><linearGradient id="gdau" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f0d98a"/><stop offset="100%" stop-color="#a07828"/></linearGradient></defs>
+            <polygon points="50,1 54,4 50,7 46,4" fill="#b8963e"/>
+            <polygon points="93,47 96,50 93,53 90,50" fill="#b8963e"/>
+            <polygon points="50,93 54,96 50,99 46,96" fill="#b8963e"/>
+            <polygon points="7,47 10,50 7,53 4,50" fill="#b8963e"/>
+            <text x="50" y="58" font-family="Georgia,serif" font-weight="700" font-size="32" fill="#0d2820" text-anchor="middle">V</text>
+          </svg>
+          <div class="logo-text">
+            <span class="logo-name">VittaBridge</span>
+            <span class="logo-tagline">Real Estate Advisory</span>
+          </div>
+        </a>
+        <nav>
+          <ul class="nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="auctions.html" class="active">Auctions</a></li>
+            <li><a href="insights.html">Insights</a></li>
+            <li><a href="contact.html" class="nav-cta">Contact Us</a></li>
+          </ul>
+        </nav>
+        <div class="hamburger"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE HERO -->
+  <section class="auction-hero">
+    <div class="container" style="position:relative; z-index:1;">
+      <span class="section-label">Curated by VittaBridge</span>
+      <h1 style="max-width:700px;">Bengaluru Bank Auction<br/>Properties</h1>
+      <div class="divider"></div>
+      <p style="max-width:600px; opacity:0.65; font-size:1rem;">Properties put up for auction by public sector banks across Bengaluru. Curated and presented by our advisory team — with independent assessment on each listing.</p>
+
+      <div class="disclaimer">
+        <span style="color:var(--gold); font-size:1rem; flex-shrink:0;">ⓘ</span>
+        <span><strong>Important:</strong> These listings are sourced from BaankNet and individual bank portals for informational purposes. VittaBridge is an independent advisory firm — we are not affiliated with any bank or the BaankNet platform. All bids are placed directly on the official bank portal. Always verify details on the official auction notice before bidding. Listings updated weekly — some may have closed. <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" style="color:var(--gold);">View live listings on BaankNet →</a></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <section class="section" style="padding-top:2.5rem;">
+    <div class="container">
+
+      <!-- Stats bar -->
+      <div class="auction-stats">
+        <div class="auction-stat"><strong>12+</strong> Active listings</div>
+        <div class="auction-stat"><strong>5</strong> Banks represented</div>
+        <div class="auction-stat"><strong>₹19L</strong> Lowest reserve</div>
+        <div class="auction-stat"><strong>₹9.56 Cr</strong> Highest reserve</div>
+        <span class="updated-badge">Last updated: June 2026</span>
+      </div>
+
+      <!-- Register interest bar -->
+      <div class="register-bar">
+        <div class="register-bar-text">
+          <h4>Want us to alert you when new Bengaluru auction listings appear?</h4>
+          <p>Register your interest — property type, budget and preferred areas. We'll notify you directly.</p>
+        </div>
+        <a href="contact.html" class="btn btn-primary" style="flex-shrink:0;">Register Interest</a>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="auction-filters">
+        <span class="auction-filter-label">Filter</span>
+        <button class="af-btn active" data-filter="all">All</button>
+        <button class="af-btn" data-filter="residential">Residential</button>
+        <button class="af-btn" data-filter="commercial">Commercial</button>
+        <button class="af-btn" data-filter="land">Land / Plot</button>
+        <button class="af-btn" data-filter="industrial">Industrial</button>
+      </div>
+
+      <!-- Listings grid -->
+      <div class="listings-grid" id="listingsGrid">
+
+        <!-- CARD 1 — SBI Flat ₹73.04L -->
+        <div class="listing-card" data-category="residential">
+          <span class="card-badge badge-upcoming">30 Jun 2026</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Residential</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Flat</span>
+            </div>
+            <div class="card-title">2BHK Residential Flat</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹73.04 L</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">State Bank of India</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value highlight">30 June 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Possession</span>
+                <span class="card-detail-value">Physical</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E568282</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              Physical possession with SBI backing at this price band is strong value for an NRI buyer. EMD typically 10% — arrange funding before bidding. Verify encumbrances and society dues.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- CARD 2 — SBI House ₹49.03L -->
+        <div class="listing-card" data-category="residential">
+          <span class="card-badge badge-upcoming">24 Jun 2026</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Residential</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Independent House</span>
+            </div>
+            <div class="card-title">Independent House</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹49.03 L</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">State Bank of India</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value highlight">24 June 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Possession</span>
+                <span class="card-detail-value">Physical</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E568904</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              Exceptional price point for an independent house in Bengaluru. Ideal for NRIs seeking rental yield — independent houses command premium rents. Physical possession simplifies timeline.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- CARD 3 — SBI Flat ₹58L -->
+        <div class="listing-card" data-category="residential">
+          <span class="card-badge badge-upcoming">23 Jun 2026</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Residential</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Flat</span>
+            </div>
+            <div class="card-title">Residential Flat</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹58.00 L</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">State Bank of India</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value highlight">23 June 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Possession</span>
+                <span class="card-detail-value">Physical</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E565066</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              SBI physical possession at ₹58L is below typical Bengaluru market rate for comparable flats. Title verification essential before bidding — contact us for a quick due diligence assessment.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- CARD 4 — SBI Flat ₹64L -->
+        <div class="listing-card" data-category="residential">
+          <span class="card-badge badge-upcoming">15 Jun 2026</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Residential</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Flat</span>
+            </div>
+            <div class="card-title">Residential Flat</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹64.00 L</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">State Bank of India</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value highlight">15 June 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Possession</span>
+                <span class="card-detail-value">Physical</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E564321</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              Auction is imminent — EMD and registration need to happen immediately. Contact us today for expedited due diligence. SBI physical possession at this price is strong value.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- CARD 5 — Karnataka Bank Flat ₹1.86Cr -->
+        <div class="listing-card" data-category="residential">
+          <span class="card-badge badge-new">High Value</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Residential</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Flat</span>
+            </div>
+            <div class="card-title">Premium Residential Flat</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹1.86 Cr</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">Karnataka Bank</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value highlight">08 May 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Type</span>
+                <span class="card-detail-value">Residential</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E554020</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              Premium Bengaluru flat at ₹1.86Cr reserve. Verify if auction has concluded — contact us and we will check directly with the bank. Suitable for NRIs seeking quality rental-yield assets.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- CARD 6 — PNB Plot ₹4.43Cr -->
+        <div class="listing-card" data-category="land">
+          <span class="card-badge badge-new">Large Plot</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Land / Plot</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Plot</span>
+            </div>
+            <div class="card-title">Residential Plot</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹4.43 Cr</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">Punjab National Bank</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value highlight">28 Apr 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Possession</span>
+                <span class="card-detail-value">Physical</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E554599</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              Large plot at ₹4.43Cr reserve — high potential for NRI investors seeking land banking or development plays in Bengaluru. Contact us to verify current status and check for rebidding.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- CARD 7 — Bank of India Flat ₹1.53Cr -->
+        <div class="listing-card" data-category="residential">
+          <span class="card-badge badge-upcoming">Verify Status</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Residential</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Flat</span>
+            </div>
+            <div class="card-title">Residential Flat</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹1.53 Cr</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">Bank of India</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value">28 Apr 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Possession</span>
+                <span class="card-detail-value">Symbolic</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E552227</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              Symbolic possession — budget for legal costs to gain physical access. Contact VittaBridge to verify if available for rebidding and to understand the possession timeline.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- CARD 8 — Indian Bank Commercial Shop ₹2.67Cr -->
+        <div class="listing-card" data-category="commercial">
+          <span class="card-badge badge-new">Commercial</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Commercial</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Shop / Retail</span>
+            </div>
+            <div class="card-title">Commercial Shop</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹2.67 Cr</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">Indian Bank</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value">16 Mar 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Possession</span>
+                <span class="card-detail-value">Symbolic</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E529619</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              Commercial retail in Bengaluru at ₹2.67Cr reserve is strong opportunity for NRIs seeking rental income. Verify current status — may be available for rebidding. Commercial possession timelines vary.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- CARD 9 — Karnataka Bank Land ₹1.27Cr -->
+        <div class="listing-card" data-category="land">
+          <span class="card-badge badge-upcoming">Verify Status</span>
+          <div class="card-header">
+            <div class="card-type-row">
+              <span class="card-type">Land / Plot</span>
+              <span class="card-type-dot"></span>
+              <span class="card-subtype">Land</span>
+            </div>
+            <div class="card-title">Residential Land Parcel</div>
+            <div class="card-location">📍 Bengaluru, Karnataka</div>
+          </div>
+          <div class="card-body">
+            <div class="card-price-row">
+              <span class="card-price-label">Reserve</span>
+              <span class="card-price">₹1.27 Cr</span>
+            </div>
+            <div class="card-details">
+              <div class="card-detail-item">
+                <span class="card-detail-label">Bank</span>
+                <span class="card-detail-value">Karnataka Bank</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Auction Date</span>
+                <span class="card-detail-value">08 May 2026</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Type</span>
+                <span class="card-detail-value">Land</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="card-detail-label">Listing ID</span>
+                <span class="card-detail-value">E554031</span>
+              </div>
+            </div>
+            <div class="card-assessment">
+              <strong>VittaBridge View</strong>
+              Land in Bengaluru at ₹1.27Cr — check survey numbers and zoning before bidding. Contact us for a Khata and encumbrance verification. Strong long-term appreciation play.
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="contact.html" class="card-cta-primary">Talk to Advisor</a>
+            <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="card-cta-secondary">View on BaankNet</a>
+          </div>
+        </div>
+
+        <!-- No listings message -->
+        <div class="no-listings" id="noListings">
+          <p style="font-size:1.1rem; margin-bottom:0.5rem;">No listings in this category right now.</p>
+          <p style="font-size:0.85rem;">Contact us to register your interest — we'll alert you when matching properties appear.</p>
+        </div>
+
+      </div><!-- /listings-grid -->
+
+      <!-- View all on BaankNet -->
+      <div style="text-align:center; margin-bottom:3rem;">
+        <p style="font-size:0.82rem; opacity:0.5; margin-bottom:1rem;">Showing curated listings. For the complete database of Bengaluru bank auctions:</p>
+        <a href="https://baanknet.com/eauction-psb/eproc-listing" target="_blank" rel="noopener" class="btn btn-outline">View All Listings on BaankNet →</a>
+      </div>
+
+      <!-- Bottom CTA -->
+      <div class="auction-bottom-cta">
+        <h3>Need Advisory Before You Bid?</h3>
+        <p>VittaBridge provides independent due diligence, EMD structuring, title verification and post-auction support for every listing — so you bid informed, not blind.</p>
+        <div class="auction-cta-buttons">
+          <a href="contact.html" class="btn btn-primary">Book a Free Consultation</a>
+          <a href="https://wa.me/919740311355" target="_blank" class="btn btn-outline">WhatsApp Us Now</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo" style="margin-bottom:1rem; display:inline-flex;">
+            <svg width="36" height="36" viewBox="0 0 100 100" fill="none">
+              <polygon points="50,4 90,50 50,96 10,50" fill="none" stroke="#b8963e" stroke-width="2"/>
+              <polygon points="50,24 70,50 50,76 30,50" fill="url(#gdfau)"/>
+              <defs><linearGradient id="gdfau" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f0d98a"/><stop offset="100%" stop-color="#a07828"/></linearGradient></defs>
+              <text x="50" y="58" font-family="Georgia,serif" font-weight="700" font-size="32" fill="#0d2820" text-anchor="middle">V</text>
+            </svg>
+            <span style="font-family:var(--font-heading); font-size:1.2rem; color:var(--cream); margin-left:0.75rem; align-self:center;">VittaBridge</span>
+          </a>
+          <p>Your trusted bridge to Indian real estate. Specialists in NRI investments and auction properties across India.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Navigate</h4>
+          <ul class="footer-links">
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="auctions.html">Auctions</a></li>
+            <li><a href="insights.html">Insights</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul class="footer-links">
+            <li><a href="services.html#nri">NRI Buyer Advisory</a></li>
+            <li><a href="services.html#auction">Auction Properties</a></li>
+            <li><a href="services.html#management">Property Management</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <div class="footer-contact-item">✉ Sri@vittabridge.com</div>
+          <div class="footer-contact-item">✆ +91 97403 11355</div>
+          <div class="footer-contact-item">📍 Bengaluru, India</div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 VittaBridge. All rights reserved. · <a href="privacy.html" style="color:inherit; opacity:0.6;">Privacy Policy</a></span>
+        <span>NRI & Auction Specialists · India</span>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/919740311355" class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <script src="js/main.js"></script>
+  <script>
+    // Filter logic
+    const filterBtns = document.querySelectorAll('.af-btn');
+    const cards = document.querySelectorAll('.listing-card');
+    const noListings = document.getElementById('noListings');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        let visible = 0;
+        cards.forEach(card => {
+          const show = f === 'all' || card.dataset.category === f;
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+        noListings.style.display = visible === 0 ? 'block' : 'none';
+      });
+    });
+
+    // Animate cards on scroll
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.08 });
+    cards.forEach((c, i) => {
+      c.style.opacity = '0';
+      c.style.transform = 'translateY(16px)';
+      c.style.transition = `opacity 0.45s ease ${i * 0.07}s, transform 0.45s ease ${i * 0.07}s`;
+      observer.observe(c);
+    });
+  </script>
+</body>
+</html>
