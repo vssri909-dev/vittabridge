@@ -254,10 +254,6 @@ function cardHtml(c) {
                 <span class="card-detail-value${highlightClass}">${c.dateStr}</span>
               </div>
               <div class="card-detail-item">
-                <span class="card-detail-label">Possession</span>
-                <span class="card-detail-value">Verify on BaankNet</span>
-              </div>
-              <div class="card-detail-item">
                 <span class="card-detail-label">Auction ID</span>
                 <span class="card-detail-value">${c.auctionId}</span>
               </div>
