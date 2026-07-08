@@ -9,11 +9,25 @@ const path = require('path');
 
 const AUCTIONS_HTML_PATH = path.join(__dirname, '..', 'auctions.html');
 
-const STATE_ID = '16';       // Karnataka
-const DISTRICT_ID = '280';   // Bengaluru Urban
-const CITY_ID = '3974';      // Bengaluru
+const STATE_ID = '16'; // Karnataka
+
+// Every BaankNet city entry whose name contains "Bengaluru"/"Bangalore", found by walking
+// /ajax/district-json/16 (all 31 Karnataka districts) then /ajax/city-json/{districtId} for
+// each one. Only two districts have a match — "Bengaluru" itself is filed under Bengaluru
+// Urban, while Bengaluru Rural separately lists a "BENGALURU" city AND a
+// "Vijayapura Bengaluru Rural" city. All three must be queried to cover every listing BaankNet
+// files under a Bengaluru-named city, since a single cityId silently missed the other two.
+const BENGALURU_CITY_TARGETS = [
+  { districtId: '280', cityId: '3974', cityName: 'Bengaluru' },                       // Bengaluru Urban
+  { districtId: '279', cityId: '8349', cityName: 'BENGALURU' },                       // Bengaluru Rural
+  { districtId: '279', cityId: '3973', cityName: 'Vijayapura Bengaluru Rural' },      // Bengaluru Rural
+];
+
 const PRICE_FROM = '15000000'; // Rs 1.5 Crore
 const SKIP_KEYWORDS = ['MACHINERY'];
+const MIN_DAYS_OUT = 4; // Exclude auctions less than this many days from today — not enough lead time for EMD/diligence.
+const PER_PAGE = 50;
+const MAX_PAGES_PER_CITY = 20; // safety cap: 20 pages * 50/page = 1000 results per city, far beyond any realistic count
 
 // -------------------- HTTP helpers (BaankNet's cert chain needs the SSL bypass, matching curl -k) --------------------
 
@@ -44,10 +58,10 @@ async function fetchTokenAndCookie() {
   return { token: tokenMatch[1], cookie: `JSESSIONID=${jsessionMatch[1]}` };
 }
 
-async function searchAuctions(token, cookie, aucDateFrom, aucDateTo) {
+async function searchAuctions(token, cookie, aucDateFrom, aucDateTo, districtId, cityId, currentPage) {
   const payload = JSON.stringify({
-    currentPage: '1', perPage: '50',
-    stateId: STATE_ID, districtId: DISTRICT_ID, cityId: CITY_ID,
+    currentPage: String(currentPage), perPage: String(PER_PAGE),
+    stateId: STATE_ID, districtId, cityId,
     keywords: '', priceFrom: PRICE_FROM, priceTo: '',
     aucDateFrom, aucDateTo,
     propertyTypeId: '', searchType: '1', aucXstatus: '-1',
@@ -67,6 +81,35 @@ async function searchAuctions(token, cookie, aucDateFrom, aucDateTo) {
   }, payload);
   if (res.statusCode !== 200) throw new Error(`search-auction returned HTTP ${res.statusCode}`);
   return res.body;
+}
+
+function extractRecordCount(html) {
+  const m = html.match(/name="recordCount"[^>]*value="(\d+)"/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+// Pages through a single (districtId, cityId) target until every result is fetched —
+// stops when the parsed count reaches BaankNet's own recordCount, or a page comes back
+// empty, or MAX_PAGES_PER_CITY is hit as a hard safety backstop against an infinite loop.
+async function fetchAllListingsForCity(token, cookie, aucDateFrom, aucDateTo, districtId, cityId) {
+  let page = 1;
+  let recordCount = null;
+  let listings = [];
+  while (true) {
+    const body = await searchAuctions(token, cookie, aucDateFrom, aucDateTo, districtId, cityId, page);
+    const rc = extractRecordCount(body);
+    if (rc !== null) recordCount = rc;
+    const pageListings = parseListings(body);
+    if (pageListings.length === 0) break;
+    listings = listings.concat(pageListings);
+    if (recordCount !== null && listings.length >= recordCount) break;
+    page++;
+    if (page > MAX_PAGES_PER_CITY) {
+      console.warn(`  WARNING: hit MAX_PAGES_PER_CITY (${MAX_PAGES_PER_CITY}) for district ${districtId}/city ${cityId} — results may be incomplete.`);
+      break;
+    }
+  }
+  return listings;
 }
 
 // -------------------- Parsing --------------------
@@ -316,18 +359,39 @@ function buildStatsBlock(cards) {
 
 async function main() {
   const today = new Date();
-  const aucDateFrom = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
+  const minDate = new Date(today);
+  minDate.setDate(minDate.getDate() + MIN_DAYS_OUT);
+  const aucDateFrom = `${String(minDate.getDate()).padStart(2, '0')}-${String(minDate.getMonth() + 1).padStart(2, '0')}-${minDate.getFullYear()}`;
   // Keep a rolling ~18-month forward window so the range never goes stale between runs.
   const aucDateTo = `31-12-${today.getFullYear() + 1}`;
 
-  console.log(`Fetching BaankNet listings (date range ${aucDateFrom} to ${aucDateTo})...`);
+  console.log(`Fetching BaankNet listings (date range ${aucDateFrom} to ${aucDateTo}) across ${BENGALURU_CITY_TARGETS.length} Bengaluru city entries...`);
   const { token, cookie } = await fetchTokenAndCookie();
-  const html = await searchAuctions(token, cookie, aucDateFrom, aucDateTo);
 
-  let listings = parseListings(html);
+  let listings = [];
+  for (const target of BENGALURU_CITY_TARGETS) {
+    const cityListings = await fetchAllListingsForCity(token, cookie, aucDateFrom, aucDateTo, target.districtId, target.cityId);
+    console.log(`  ${target.cityName} (district ${target.districtId}, city ${target.cityId}): ${cityListings.length} listing(s)`);
+    listings = listings.concat(cityListings);
+  }
+
+  const beforeDedupeCount = listings.length;
+  const seenAuctionIds = new Set();
+  listings = listings.filter(item => {
+    if (seenAuctionIds.has(item.auctionId)) return false;
+    seenAuctionIds.add(item.auctionId);
+    return true;
+  });
+  const dedupedCount = beforeDedupeCount - listings.length;
+
   const beforeSkipCount = listings.length;
   listings = listings.filter(item => !SKIP_KEYWORDS.some(kw => item.title.toUpperCase().includes(kw)));
-  const skipped = beforeSkipCount - listings.length;
+  const skippedNonRealEstate = beforeSkipCount - listings.length;
+
+  // Defensive re-check: don't rely solely on BaankNet's own date filter for the 4-day gap.
+  const beforeDateFilterCount = listings.length;
+  listings = listings.filter(item => daysBetween(today, parseDMY(item.startDate)) >= MIN_DAYS_OUT);
+  const skippedTooSoon = beforeDateFilterCount - listings.length;
 
   if (listings.length === 0) {
     throw new Error('No listings parsed from BaankNet response — aborting without touching auctions.html');
@@ -352,7 +416,7 @@ async function main() {
 
   fs.writeFileSync(AUCTIONS_HTML_PATH, content, 'utf-8');
 
-  console.log(`Wrote ${cards.length} listings (${skipped} skipped as non-real-estate) to auctions.html`);
+  console.log(`Wrote ${cards.length} listings (${dedupedCount} duplicate(s) across city queries, ${skippedNonRealEstate} skipped as non-real-estate, ${skippedTooSoon} skipped as < ${MIN_DAYS_OUT} days out) to auctions.html`);
   console.log(`Banks: ${[...new Set(cards.map(c => c.bank))].join(', ')}`);
 }
 
