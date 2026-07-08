@@ -1,6 +1,6 @@
 // Refreshes the auction listings on auctions.html with live data from BaankNet.
 // Run manually with: node scripts/refresh-auctions.js
-// Run automatically weekly via .github/workflows/refresh-auctions.yml
+// Run automatically daily via .github/workflows/refresh-auctions.yml
 'use strict';
 
 const https = require('https');

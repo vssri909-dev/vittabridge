@@ -2,8 +2,8 @@ name: Refresh auction listings
 
 on:
   schedule:
-    # Every Monday at 02:00 UTC (~07:30 IST)
-    - cron: '0 2 * * 1'
+    # Every day at 18:45 UTC (~00:15 IST — just after midnight)
+    - cron: '45 18 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -33,5 +33,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add auctions.html
-          git commit -m "Update auction listings — automated weekly refresh"
+          git commit -m "Update auction listings — automated daily refresh"
           git push
