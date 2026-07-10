@@ -38,10 +38,15 @@ function httpRequest(options, body) {
       res.on('data', chunk => (data += chunk));
       res.on('end', () => resolve({ statusCode: res.statusCode, headers: res.headers, body: data }));
     });
+    req.setTimeout(30000, () => req.destroy(new Error(`request to ${options.path} timed out after 30s`)));
     req.on('error', reject);
     if (body) req.write(body);
     req.end();
   });
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function fetchTokenAndCookie() {
@@ -148,11 +153,73 @@ function parseListings(html) {
     const bank = bankM ? unescapeHtml(bankM[1]).replace(/\s+/g, ' ').trim() : '';
     const location = locationM ? unescapeHtml(locationM[1]).replace(/\s+/g, ' ').trim() : '';
     const startDate = startDateM ? startDateM[1] : null;
+    const noticeLinkM = block.match(/href="(\/eauction-psb\/view-auction-notice\/\d+\/0\/[A-Za-z0-9]+)"/);
 
     if (!reserveCrore || !startDate) continue;
-    results.push({ title, auctionId, reserveCrore, bank, location, startDate });
+    results.push({ title, auctionId, reserveCrore, bank, location, startDate, noticeLink: noticeLinkM ? noticeLinkM[1] : null });
   }
   return results;
+}
+
+// -------------------- Auction-notice detail enrichment --------------------
+
+// The view-auction-notice page is server-rendered with a uniform structure:
+// <span>LABEL</span><span class="common-colon">:</span></label> ... <div class="value">VALUE</div>
+// This pulls every label/value pair on the page into a plain object.
+function parseNoticeFields(html) {
+  const fields = {};
+  const re = /<span>([^<]+?)<\/span><span class="common-colon">:<\/span><\/label>\s*<div class="col-md-\d+">\s*<div class="value">([\s\S]*?)<\/div>/g;
+  let m;
+  while ((m = re.exec(html))) {
+    const label = m[1].replace(/\s+/g, ' ').trim();
+    const value = unescapeHtml(m[2]).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!(label in fields) && value !== '') fields[label] = value;
+  }
+  return fields;
+}
+
+async function fetchNoticeDetails(cookie, noticeLink) {
+  const res = await httpRequest({
+    hostname: 'baanknet.com',
+    path: noticeLink,
+    method: 'GET',
+    headers: { Cookie: cookie },
+  });
+  if (res.statusCode !== 200) throw new Error(`notice page returned HTTP ${res.statusCode}`);
+  return parseNoticeFields(res.body);
+}
+
+// "2,20,50,000.00" -> 22050000
+function parseIndianAmount(s) {
+  if (!s) return null;
+  const v = parseFloat(s.replace(/,/g, ''));
+  return Number.isFinite(v) && v > 0 ? v : null;
+}
+
+// Rupees -> compact display: >= 1 Cr as Cr, else Lakh
+function fmtMoney(rupees) {
+  if (rupees >= 1e7) return `₹${(rupees / 1e7).toFixed(2)} Cr`;
+  return `₹${(rupees / 1e5).toFixed(2)} Lakh`;
+}
+
+// "13-07-2026 17:00" -> { date: Date, time: '17:00' }
+function parseNoticeDateTime(s) {
+  if (!s) return null;
+  const m = s.match(/(\d{2})-(\d{2})-(\d{4})\s+(\d{2}:\d{2})/);
+  if (!m) return null;
+  return { date: new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])), time: m[4] };
+}
+
+// "... Latitude- 12.59240N Longitude- 77.36109E ..." -> { lat, lng }
+function parseCoordinates(addressText) {
+  if (!addressText) return null;
+  const m = addressText.match(/Latitude-?\s*([\d.]+)\s*N[\s\S]*?Longitude-?\s*([\d.]+)\s*E/i);
+  if (!m) return null;
+  const lat = parseFloat(m[1]);
+  const lng = parseFloat(m[2]);
+  // sanity: rough bounding box for Karnataka
+  if (lat < 11 || lat > 19 || lng < 74 || lng > 79) return null;
+  return { lat, lng };
 }
 
 // -------------------- Classification / card building --------------------
@@ -210,15 +277,22 @@ function extractLocalityAndPin(item) {
 }
 
 function classify(item) {
-  const t = item.title.toUpperCase();
+  // Prefer the bank's own Property Type / Sub Type from the auction notice over
+  // guessing from title keywords; fall back to the title when the notice is missing.
+  const noticeText = item.notice ? `${item.notice['Property Type'] || ''} ${item.notice['Property Sub Type'] || ''}`.trim() : '';
+  const t = (noticeText || item.title).toUpperCase();
   if (t.includes('INDUSTRIAL')) return { category: 'industrial', subtype: 'Industrial Plot', cardType: 'Industrial' };
   if (t.includes('OFFICE')) return { category: 'commercial', subtype: 'Office', cardType: 'Commercial' };
   if (t.includes('COMMERCIAL')) return { category: 'commercial', subtype: 'Residential Cum Commercial', cardType: 'Commercial' };
-  if (t.includes('PLOT')) return { category: 'land', subtype: 'Plot', cardType: 'Land / Plot' };
+  if (t.includes('PLOT') || t.includes('LAND')) return { category: 'land', subtype: 'Plot', cardType: 'Land / Plot' };
   if (t.includes('VILLA')) return { category: 'residential', subtype: 'Villa', cardType: 'Residential' };
   if (t.includes('FLAT') || t.includes('APARTMENT')) return { category: 'residential', subtype: 'Flat', cardType: 'Residential' };
   if (t.includes('HOUSE')) return { category: 'residential', subtype: 'Independent House', cardType: 'Residential' };
   return { category: 'residential', subtype: 'Property', cardType: 'Residential' };
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function extractBhkPrefix(item) {
@@ -233,6 +307,22 @@ function buildCards(rawListings, today) {
     const { locality, pin, hasSpecificLocality } = extractLocalityAndPin(item);
     const { category, subtype, cardType } = classify(item);
     const bhk = extractBhkPrefix(item);
+
+    // Enrichment from the auction-notice page (each field null when unavailable)
+    const notice = item.notice || {};
+    const reserveExact = parseIndianAmount(notice['Reserve Price']);
+    if (reserveExact) item.reserveCrore = reserveExact / 1e7; // exact figure beats the search page's rounded "X.XX Crore"
+    const emdRupees = parseIndianAmount(notice['EMD']);
+    const emdStr = emdRupees ? fmtMoney(emdRupees) : null;
+    const emdEnd = parseNoticeDateTime(notice['EMD End date & time']);
+    const emdCloseStr = emdEnd ? `${fmtShortBadge(emdEnd.date)} ${emdEnd.date.getFullYear()}, ${emdEnd.time}` : null;
+    const aucStart = parseNoticeDateTime(notice['Auction Start Date & Time']);
+    const aucEnd = parseNoticeDateTime(notice['Auction End Date & Time']);
+    const auctionTimeStr = aucStart && aucEnd ? `${aucStart.time} – ${aucEnd.time} IST` : null;
+    const inspFrom = parseNoticeDateTime(notice['Inspection Date & Time From']);
+    const inspTo = parseNoticeDateTime(notice['Inspection Date & Time To']);
+    const inspectionStr = inspFrom && inspTo ? `${fmtShortBadge(inspFrom.date)} – ${fmtShortBadge(inspTo.date)} ${inspTo.date.getFullYear()}` : null;
+    const coords = parseCoordinates(notice['Property Address']);
 
     let badgeClass, badgeText, isUrgent = false;
     if (category === 'commercial') {
@@ -253,8 +343,12 @@ function buildCards(rawListings, today) {
       category, cardType, subtype, cardTitle, locality, pin, hasSpecificLocality,
       bank: item.bank, reserveStr, dateStr: fmtLongDate(date),
       auctionId: item.auctionId, badgeClass, badgeText, isUrgent, reserveCrore: item.reserveCrore,
+      auctionDate: date, emdStr, emdCloseStr, auctionTimeStr, inspectionStr, coords,
     };
   });
+
+  // Soonest auction first — most actionable at the top
+  cards.sort((a, b) => a.auctionDate - b.auctionDate || a.reserveCrore - b.reserveCrore);
 
   // Disambiguate cards whose title + location line are identical
   const seenKeys = new Map();
@@ -271,16 +365,35 @@ function buildCards(rawListings, today) {
 
 function cardHtml(c) {
   const highlightClass = c.isUrgent ? ' highlight' : '';
+  const mapLink = c.coords
+    ? ` <a href="https://www.google.com/maps?q=${c.coords.lat},${c.coords.lng}" target="_blank" rel="noopener" style="color:var(--gold); font-size:0.72rem; letter-spacing:1px;">MAP ↗</a>`
+    : '';
+
+  const detailItems = [
+    { label: 'Bank', value: escapeHtml(c.bank) },
+    { label: 'Auction Date', value: c.dateStr, extraClass: highlightClass },
+  ];
+  if (c.auctionTimeStr) detailItems.push({ label: 'Auction Time', value: c.auctionTimeStr });
+  if (c.emdStr) detailItems.push({ label: 'EMD Amount', value: c.emdStr });
+  if (c.emdCloseStr) detailItems.push({ label: 'EMD Closes', value: c.emdCloseStr, extraClass: highlightClass });
+  if (c.inspectionStr) detailItems.push({ label: 'Inspection', value: c.inspectionStr });
+  detailItems.push({ label: 'Auction ID', value: c.auctionId });
+
+  const detailsHtml = detailItems.map(d => `              <div class="card-detail-item">
+                <span class="card-detail-label">${d.label}</span>
+                <span class="card-detail-value${d.extraClass || ''}">${d.value}</span>
+              </div>`).join('\n');
+
   return `        <div class="listing-card" data-category="${c.category}">
           <span class="card-badge ${c.badgeClass}">${c.badgeText}</span>
           <div class="card-header">
             <div class="card-type-row">
               <span class="card-type">${c.cardType}</span>
               <span class="card-type-dot"></span>
-              <span class="card-subtype">${c.subtype}</span>
+              <span class="card-subtype">${escapeHtml(c.subtype)}</span>
             </div>
-            <div class="card-title">${c.cardTitle}</div>
-            <div class="card-location">📍 ${c.hasSpecificLocality ? `${c.locality}, ` : ''}Bengaluru-${c.pin}</div>
+            <div class="card-title">${escapeHtml(c.cardTitle)}</div>
+            <div class="card-location">📍 ${escapeHtml(c.hasSpecificLocality ? `${c.locality}, ` : '')}Bengaluru-${c.pin}${mapLink}</div>
           </div>
           <div class="card-body">
             <div class="card-price-row">
@@ -288,18 +401,7 @@ function cardHtml(c) {
               <span class="card-price">${c.reserveStr}</span>
             </div>
             <div class="card-details">
-              <div class="card-detail-item">
-                <span class="card-detail-label">Bank</span>
-                <span class="card-detail-value">${c.bank}</span>
-              </div>
-              <div class="card-detail-item">
-                <span class="card-detail-label">Auction Date</span>
-                <span class="card-detail-value${highlightClass}">${c.dateStr}</span>
-              </div>
-              <div class="card-detail-item">
-                <span class="card-detail-label">Auction ID</span>
-                <span class="card-detail-value">${c.auctionId}</span>
-              </div>
+${detailsHtml}
             </div>
           </div>
           <div class="card-footer">
@@ -396,6 +498,28 @@ async function main() {
   if (listings.length === 0) {
     throw new Error('No listings parsed from BaankNet response — aborting without touching auctions.html');
   }
+
+  // Enrich each listing from its auction-notice page (EMD, deadlines, times, inspection,
+  // authoritative property type, exact reserve, coordinates). Non-fatal per listing:
+  // a card falls back to search-level data if its notice can't be fetched.
+  let enriched = 0;
+  for (const item of listings) {
+    if (!item.noticeLink) continue;
+    try {
+      item.notice = await fetchNoticeDetails(cookie, item.noticeLink);
+      enriched++;
+    } catch (err) {
+      await sleep(500);
+      try {
+        item.notice = await fetchNoticeDetails(cookie, item.noticeLink);
+        enriched++;
+      } catch (err2) {
+        console.warn(`  WARNING: could not fetch auction notice for ${item.auctionId}: ${err2.message} — card will use search-level data only`);
+      }
+    }
+    await sleep(200); // stay polite to the portal
+  }
+  console.log(`Enriched ${enriched}/${listings.length} listings from auction-notice pages`);
 
   const cards = buildCards(listings, today);
   const cardsHtml = cards.map(cardHtml).join('\n\n');
