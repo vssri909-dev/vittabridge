@@ -56,7 +56,11 @@ async function fetchTokenAndCookie() {
     method: 'GET',
   });
   const tokenMatch = res.body.match(/content="([a-f0-9-]{36})"/);
-  if (!tokenMatch) throw new Error('CSRF token not found in eproc-listing page');
+  if (!tokenMatch) {
+    // BaankNet's WAF serves a bare 403 to datacenter IPs (e.g. GitHub-hosted runners) —
+    // surface the status and body so an IP block isn't mistaken for a page-structure change.
+    throw new Error(`CSRF token not found in eproc-listing page (HTTP ${res.statusCode}): ${res.body.slice(0, 200).replace(/\s+/g, ' ').trim()}`);
+  }
   const setCookie = res.headers['set-cookie'] || [];
   const jsessionMatch = setCookie.join(';').match(/JSESSIONID=([^;]+)/);
   if (!jsessionMatch) throw new Error('JSESSIONID cookie not found');
