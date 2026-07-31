@@ -1,9 +1,11 @@
 name: Refresh auction listings
 
+# NOTE (Jul 2026): BaankNet's WAF returns 403 Forbidden to GitHub-hosted runner IPs,
+# so the daily cron was failing every night and has been disabled. The daily refresh
+# now runs locally via Windows Task Scheduler ("VittaBridge auction refresh", 00:15 IST)
+# using scripts/refresh-and-push.ps1. This workflow is kept for manual dispatch in case
+# the block is ever lifted.
 on:
-  schedule:
-    # Every day at 18:45 UTC (~00:15 IST — just after midnight)
-    - cron: '45 18 * * *'
   workflow_dispatch: {}
 
 permissions:
