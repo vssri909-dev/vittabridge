@@ -1,6 +1,12 @@
 // Refreshes the auction listings on auctions.html with live data from BaankNet.
 // Run manually with: node scripts/refresh-auctions.js
-// Run automatically daily via .github/workflows/refresh-auctions.yml
+// Run automatically daily via scripts/refresh-and-push.ps1 (Windows Task Scheduler).
+//
+// BaankNet was rebuilt as a React SPA in August 2026. The old server-rendered
+// /eauction-psb/* pages now 308-redirect to /auction-listing/property and no longer exist,
+// so this reads the JSON API the SPA itself calls. That API returns every field the old
+// auction-notice pages had to be scraped for (exact reserve, EMD, deadlines, inspection
+// window, authoritative property type), so the per-listing notice fetch is gone.
 'use strict';
 
 const https = require('https');
@@ -9,31 +15,36 @@ const path = require('path');
 
 const AUCTIONS_HTML_PATH = path.join(__dirname, '..', 'auctions.html');
 
-const STATE_ID = '16'; // Karnataka
+const API_HOST = 'baanknet.com';
+const LISTING_API_PATH = '/api/v1/auction/detail/auction-listing';
+const LISTING_PAGE_URL = 'https://baanknet.com/auction-listing/property';
+
+const STATE_ID = 16; // Karnataka
 
 // Every BaankNet city entry whose name contains "Bengaluru"/"Bangalore", found by walking
-// /ajax/district-json/16 (all 31 Karnataka districts) then /ajax/city-json/{districtId} for
-// each one. Only two districts have a match — "Bengaluru" itself is filed under Bengaluru
-// Urban, while Bengaluru Rural separately lists a "BENGALURU" city AND a
-// "Vijayapura Bengaluru Rural" city. All three must be queried to cover every listing BaankNet
-// files under a Bengaluru-named city, since a single cityId silently missed the other two.
+// /api/v1/common/districts?stateId=16 (all 31 Karnataka districts) then
+// /api/v1/common/cities?districtId={id} for each one. Only two districts have a match —
+// "Bengaluru" itself is filed under Bengaluru Urban, while Bengaluru Rural separately lists
+// a "BENGALURU" city AND a "Vijayapura Bengaluru Rural" city. All three must be queried to
+// cover every listing BaankNet files under a Bengaluru-named city, since a single cityId
+// silently missed the other two. (These IDs survived the August 2026 rewrite unchanged.)
 const BENGALURU_CITY_TARGETS = [
-  { districtId: '280', cityId: '3974', cityName: 'Bengaluru' },                       // Bengaluru Urban
-  { districtId: '279', cityId: '8349', cityName: 'BENGALURU' },                       // Bengaluru Rural
-  { districtId: '279', cityId: '3973', cityName: 'Vijayapura Bengaluru Rural' },      // Bengaluru Rural
+  { districtId: 280, cityId: 3974, cityName: 'Bengaluru' },                       // Bengaluru Urban
+  { districtId: 279, cityId: 8349, cityName: 'BENGALURU' },                       // Bengaluru Rural
+  { districtId: 279, cityId: 3973, cityName: 'Vijayapura Bengaluru Rural' },      // Bengaluru Rural
 ];
 
-const PRICE_FROM = '15000000'; // Rs 1.5 Crore
+const PRICE_FROM = 15000000; // Rs 1.5 Crore
 const SKIP_KEYWORDS = ['MACHINERY'];
 const MIN_DAYS_OUT = 4; // Exclude auctions less than this many days from today — not enough lead time for EMD/diligence.
 const PER_PAGE = 50;
 const MAX_PAGES_PER_CITY = 20; // safety cap: 20 pages * 50/page = 1000 results per city, far beyond any realistic count
 
-// -------------------- HTTP helpers (BaankNet's cert chain needs the SSL bypass, matching curl -k) --------------------
+// -------------------- HTTP helpers --------------------
 
 function httpRequest(options, body) {
   return new Promise((resolve, reject) => {
-    const req = https.request({ ...options, rejectUnauthorized: false }, res => {
+    const req = https.request(options, res => {
       let data = '';
       res.on('data', chunk => (data += chunk));
       res.on('end', () => resolve({ statusCode: res.statusCode, headers: res.headers, body: data }));
@@ -49,169 +60,147 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function fetchTokenAndCookie() {
-  const res = await httpRequest({
-    hostname: 'baanknet.com',
-    path: '/eauction-psb/eproc-listing',
-    method: 'GET',
-  });
-  const tokenMatch = res.body.match(/content="([a-f0-9-]{36})"/);
-  if (!tokenMatch) {
-    // BaankNet's WAF serves a bare 403 to datacenter IPs (e.g. GitHub-hosted runners) —
-    // surface the status and body so an IP block isn't mistaken for a page-structure change.
-    throw new Error(`CSRF token not found in eproc-listing page (HTTP ${res.statusCode}): ${res.body.slice(0, 200).replace(/\s+/g, ' ').trim()}`);
-  }
-  const setCookie = res.headers['set-cookie'] || [];
-  const jsessionMatch = setCookie.join(';').match(/JSESSIONID=([^;]+)/);
-  if (!jsessionMatch) throw new Error('JSESSIONID cookie not found');
-  return { token: tokenMatch[1], cookie: `JSESSIONID=${jsessionMatch[1]}` };
-}
+// -------------------- Listing API --------------------
 
-async function searchAuctions(token, cookie, aucDateFrom, aucDateTo, districtId, cityId, currentPage) {
+// The SPA posts { search, range, sort, page, limit, auctionStatus }: `search` holds the
+// exact-match filters, `range` the min/max and date-window ones. The public listing search
+// needs no auth, CSRF token or session cookie.
+async function searchAuctions(districtId, cityId, auctionDateStart, auctionDateEnd, page) {
   const payload = JSON.stringify({
-    currentPage: String(currentPage), perPage: String(PER_PAGE),
-    stateId: STATE_ID, districtId, cityId,
-    keywords: '', priceFrom: PRICE_FROM, priceTo: '',
-    aucDateFrom, aucDateTo,
-    propertyTypeId: '', searchType: '1', aucXstatus: '-1',
+    search: { stateId: STATE_ID, districtId, cityId },
+    range: { reservePriceMin: PRICE_FROM, auctionDateStart, auctionDateEnd },
+    sort: { type: 'closest' },
+    page,
+    limit: PER_PAGE,
+    auctionStatus: 'upcoming', // excludes live, closed and cancelled auctions
   });
   const res = await httpRequest({
-    hostname: 'baanknet.com',
-    path: '/eauction-psb/ajax/search-auction',
+    hostname: API_HOST,
+    path: LISTING_API_PATH,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-      'X-CSRF-TOKEN': token,
-      'Referer': 'https://baanknet.com/eauction-psb/eproc-listing',
-      'Cookie': cookie,
+      'Accept': 'application/json',
+      'Referer': LISTING_PAGE_URL,
       'Content-Length': Buffer.byteLength(payload),
     },
   }, payload);
-  if (res.statusCode !== 200) throw new Error(`search-auction returned HTTP ${res.statusCode}`);
-  return res.body;
-}
-
-function extractRecordCount(html) {
-  const m = html.match(/name="recordCount"[^>]*value="(\d+)"/);
-  return m ? parseInt(m[1], 10) : null;
+  if (res.statusCode !== 200) {
+    // BaankNet's WAF serves a bare 403 to some datacenter IPs (e.g. GitHub-hosted runners) —
+    // surface the status and body so an IP block isn't mistaken for an API change.
+    throw new Error(`${LISTING_API_PATH} returned HTTP ${res.statusCode}: ${res.body.slice(0, 200).replace(/\s+/g, ' ').trim()}`);
+  }
+  let json;
+  try {
+    json = JSON.parse(res.body);
+  } catch (err) {
+    throw new Error(`${LISTING_API_PATH} returned non-JSON: ${res.body.slice(0, 200).replace(/\s+/g, ' ').trim()}`);
+  }
+  const data = json && json.data;
+  if (!data || !Array.isArray(data.data)) {
+    throw new Error(`${LISTING_API_PATH} response has no data.data array — the API shape has changed`);
+  }
+  return { hits: data.data, total: typeof data.total === 'number' ? data.total : null };
 }
 
 // Pages through a single (districtId, cityId) target until every result is fetched —
-// stops when the parsed count reaches BaankNet's own recordCount, or a page comes back
+// stops when the collected count reaches BaankNet's own total, or a page comes back
 // empty, or MAX_PAGES_PER_CITY is hit as a hard safety backstop against an infinite loop.
-async function fetchAllListingsForCity(token, cookie, aucDateFrom, aucDateTo, districtId, cityId) {
+async function fetchAllListingsForCity(districtId, cityId, auctionDateStart, auctionDateEnd) {
   let page = 1;
-  let recordCount = null;
-  let listings = [];
+  let total = null;
+  let hits = [];
   while (true) {
-    const body = await searchAuctions(token, cookie, aucDateFrom, aucDateTo, districtId, cityId, page);
-    const rc = extractRecordCount(body);
-    if (rc !== null) recordCount = rc;
-    const pageListings = parseListings(body);
-    if (pageListings.length === 0) break;
-    listings = listings.concat(pageListings);
-    if (recordCount !== null && listings.length >= recordCount) break;
+    const res = await searchAuctions(districtId, cityId, auctionDateStart, auctionDateEnd, page);
+    if (res.total !== null) total = res.total;
+    if (res.hits.length === 0) break;
+    hits = hits.concat(res.hits);
+    if (total !== null && hits.length >= total) break;
     page++;
     if (page > MAX_PAGES_PER_CITY) {
       console.warn(`  WARNING: hit MAX_PAGES_PER_CITY (${MAX_PAGES_PER_CITY}) for district ${districtId}/city ${cityId} — results may be incomplete.`);
       break;
     }
+    await sleep(200); // stay polite to the portal
   }
-  return listings;
+  return hits;
 }
 
-// -------------------- Parsing --------------------
+// -------------------- Normalisation --------------------
 
-function unescapeHtml(s) {
-  return s
-    .replace(/&#8377;/g, '₹')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+// BaankNet returns UTC ISO timestamps; every date and time shown on the site is IST.
+const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
+
+// "2026-09-07T05:00:00.000Z" -> { day: Date at local midnight on the IST calendar day, time: '10:30' }
+// Anchoring `day` to local midnight keeps the day arithmetic below correct whatever
+// timezone the machine running this is set to.
+function istDateTime(iso) {
+  if (!iso) return null;
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return null;
+  const s = new Date(t + IST_OFFSET_MS);
+  return {
+    day: new Date(s.getUTCFullYear(), s.getUTCMonth(), s.getUTCDate()),
+    time: `${String(s.getUTCHours()).padStart(2, '0')}:${String(s.getUTCMinutes()).padStart(2, '0')}`,
+  };
 }
 
-function parseListings(html) {
-  const blocks = html.split('<div class="eproc-listing-main">').slice(1);
-  const results = [];
-  for (const block of blocks) {
-    const titleM = block.match(/<h4><a>\d+\)\s*([\s\S]*?)<\/a><\/h4>/);
-    const auctionIdM = block.match(/Auction ID:\s*\n?\s*([0-9]+)/);
-    const reserveM = block.match(/Reserve Price:\s*&#8377;\s*([0-9,.]+)\s*(Crore|Lakh|Cr|Lac)/i);
-    const bankM = block.match(/x-dept-name">\s*(?:<img[^>]*\/?>)?\s*([^<]+?)\s*<\/p>/s);
-    const locationM = block.match(/ref-location">[\s\S]*?<span>\s*([\s\S]*?)<\/span>\s*<\/span>/);
-    const startDateM = block.match(/Start Date\s*:\s*([\d-]+)\s+([\d:]+)/);
-
-    if (!titleM || !auctionIdM) continue;
-
-    const title = unescapeHtml(titleM[1]).replace(/\s+/g, ' ').trim();
-    const auctionId = auctionIdM[1].trim();
-    let reserveCrore = null;
-    if (reserveM) {
-      const v = parseFloat(reserveM[1].replace(/,/g, ''));
-      const unit = reserveM[2].toLowerCase();
-      reserveCrore = (unit === 'lakh' || unit === 'lac') ? v / 100 : v;
-    }
-    const bank = bankM ? unescapeHtml(bankM[1]).replace(/\s+/g, ' ').trim() : '';
-    const location = locationM ? unescapeHtml(locationM[1]).replace(/\s+/g, ' ').trim() : '';
-    const startDate = startDateM ? startDateM[1] : null;
-    const noticeLinkM = block.match(/href="(\/eauction-psb\/view-auction-notice\/\d+\/0\/[A-Za-z0-9]+)"/);
-
-    if (!reserveCrore || !startDate) continue;
-    results.push({ title, auctionId, reserveCrore, bank, location, startDate, noticeLink: noticeLinkM ? noticeLinkM[1] : null });
-  }
-  return results;
+// Today's date in IST, at local midnight — the baseline every "days away" figure counts from.
+function istToday() {
+  const s = new Date(Date.now() + IST_OFFSET_MS);
+  return new Date(s.getUTCFullYear(), s.getUTCMonth(), s.getUTCDate());
 }
 
-// -------------------- Auction-notice detail enrichment --------------------
-
-// The view-auction-notice page is server-rendered with a uniform structure:
-// <span>LABEL</span><span class="common-colon">:</span></label> ... <div class="value">VALUE</div>
-// This pulls every label/value pair on the page into a plain object.
-function parseNoticeFields(html) {
-  const fields = {};
-  const re = /<span>([^<]+?)<\/span><span class="common-colon">:<\/span><\/label>\s*<div class="col-md-\d+">\s*<div class="value">([\s\S]*?)<\/div>/g;
-  let m;
-  while ((m = re.exec(html))) {
-    const label = m[1].replace(/\s+/g, ' ').trim();
-    const value = unescapeHtml(m[2]).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-    if (!(label in fields) && value !== '') fields[label] = value;
-  }
-  return fields;
+// "5460000.00000" -> 5460000
+function parseAmount(v) {
+  if (v === null || v === undefined || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-async function fetchNoticeDetails(cookie, noticeLink) {
-  const res = await httpRequest({
-    hostname: 'baanknet.com',
-    path: noticeLink,
-    method: 'GET',
-    headers: { Cookie: cookie },
-  });
-  if (res.statusCode !== 200) throw new Error(`notice page returned HTTP ${res.statusCode}`);
-  return parseNoticeFields(res.body);
+// One search hit -> the flat shape the card builder works with.
+function normaliseListing(hit) {
+  const s = hit && hit._source;
+  if (!s || !s.auctionId) return null;
+  return {
+    auctionId: String(s.auctionId),
+    title: (s.propertyHeading || '').replace(/\s+/g, ' ').trim(),
+    bank: (s.propertyBankName || '').replace(/\s+/g, ' ').trim(),
+    reserveRupees: parseAmount(s.reservePrice),
+    emdRupees: parseAmount(s.emd),
+    propertyType: s.propertyType || '',
+    propertySubType: s.propertySubType || '',
+    locality: (s.locality || '').replace(/\s+/g, ' ').trim(),
+    pincode: (s.pincode || '').trim(),
+    address: s.address || '',
+    noOfRooms: s.noOfRooms,
+    auctionStart: istDateTime(s.auctionFrom),
+    auctionEnd: istDateTime(s.auctionTo),
+    emdEnd: istDateTime(s.emdEnd),
+    inspectionFrom: istDateTime(s.inspectionStart),
+    inspectionTo: istDateTime(s.inspectionEnd),
+  };
 }
 
-// "2,20,50,000.00" -> 22050000
-function parseIndianAmount(s) {
-  if (!s) return null;
-  const v = parseFloat(s.replace(/,/g, ''));
-  return Number.isFinite(v) && v > 0 ? v : null;
+// -------------------- Classification / card building --------------------
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function daysBetween(a, b) {
+  return Math.round((b - a) / (1000 * 60 * 60 * 24));
+}
+function fmtLongDate(d) {
+  return `${String(d.getDate()).padStart(2, '0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+}
+function fmtShortBadge(d) {
+  return `${String(d.getDate()).padStart(2, '0')} ${MONTHS_SHORT[d.getMonth()]}`;
 }
 
 // Rupees -> compact display: >= 1 Cr as Cr, else Lakh
 function fmtMoney(rupees) {
   if (rupees >= 1e7) return `₹${(rupees / 1e7).toFixed(2)} Cr`;
   return `₹${(rupees / 1e5).toFixed(2)} Lakh`;
-}
-
-// "13-07-2026 17:00" -> { date: Date, time: '17:00' }
-function parseNoticeDateTime(s) {
-  if (!s) return null;
-  const m = s.match(/(\d{2})-(\d{2})-(\d{4})\s+(\d{2}:\d{2})/);
-  if (!m) return null;
-  return { date: new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1])), time: m[4] };
 }
 
 // "... Latitude- 12.59240N Longitude- 77.36109E ..." -> { lat, lng }
@@ -226,24 +215,6 @@ function parseCoordinates(addressText) {
   return { lat, lng };
 }
 
-// -------------------- Classification / card building --------------------
-
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-function parseDMY(s) {
-  const [d, m, y] = s.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-function daysBetween(a, b) {
-  return Math.round((b - a) / (1000 * 60 * 60 * 24));
-}
-function fmtLongDate(d) {
-  return `${String(d.getDate()).padStart(2, '0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-}
-function fmtShortBadge(d) {
-  return `${String(d.getDate()).padStart(2, '0')} ${MONTHS_SHORT[d.getMonth()]}`;
-}
 function titleCaseWord(w) {
   if (/^[0-9]+$/.test(w)) return w;
   return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
@@ -265,13 +236,22 @@ function cleanLocality(loc) {
 }
 
 function extractLocalityAndPin(item) {
-  const pinM = item.location.match(/Bengaluru-(\d{6})/);
-  const pin = pinM ? pinM[1] : '560001';
+  const pin = /^\d{6}$/.test(item.pincode) ? item.pincode : '560001';
 
-  let m = item.title.match(/for Sale in\s+(.*?)(?:,\s*Bengaluru-\d{6}\.?,?\s*)?,?\s*Bengaluru\s*$/i);
-  let locality = m ? m[1].trim() : '';
-  locality = locality.replace(/^Nil,\s*/i, '');
-  locality = locality.replace(/,\s*Bengaluru-\d{6}\.?$/i, '');
+  // The API's own locality field is authoritative; fall back to the tail of the
+  // "<area> <subtype> for sale in <locality> Bengaluru" heading when it comes back null.
+  let locality = item.locality;
+  if (!locality) {
+    const m = item.title.match(/for sale in\s+(.+)$/i);
+    locality = m ? m[1] : '';
+  }
+  locality = locality
+    .replace(/\s*\bBengaluru\b\s*$/i, '')
+    .replace(/[,\s]*\d{6}\s*$/, '')
+    .replace(/^Nil,\s*/i, '')
+    .replace(/[,\s]+$/, '')
+    .trim();
+
   if (!locality || /^bengaluru$/i.test(locality)) {
     return { locality: 'Bengaluru', pin, hasSpecificLocality: false };
   }
@@ -281,10 +261,10 @@ function extractLocalityAndPin(item) {
 }
 
 function classify(item) {
-  // Prefer the bank's own Property Type / Sub Type from the auction notice over
-  // guessing from title keywords; fall back to the title when the notice is missing.
-  const noticeText = item.notice ? `${item.notice['Property Type'] || ''} ${item.notice['Property Sub Type'] || ''}`.trim() : '';
-  const t = (noticeText || item.title).toUpperCase();
+  // The bank's own Property Type / Sub Type is authoritative; fall back to the
+  // heading only when the API leaves both blank.
+  const typeText = `${item.propertyType} ${item.propertySubType}`.trim();
+  const t = (typeText || item.title).toUpperCase();
   if (t.includes('INDUSTRIAL')) return { category: 'industrial', subtype: 'Industrial Plot', cardType: 'Industrial' };
   if (t.includes('OFFICE')) return { category: 'commercial', subtype: 'Office', cardType: 'Commercial' };
   if (t.includes('COMMERCIAL')) return { category: 'commercial', subtype: 'Residential Cum Commercial', cardType: 'Commercial' };
@@ -300,38 +280,37 @@ function escapeHtml(s) {
 }
 
 function extractBhkPrefix(item) {
-  const m = item.title.match(/^(\d+\s*BHK)\s+/i);
-  return m ? m[1].toUpperCase().replace(/\s+/, ' ') : null;
+  const rooms = Number(item.noOfRooms);
+  if (Number.isInteger(rooms) && rooms > 0) return `${rooms} BHK`;
+  const m = item.title.match(/(\d+)\s*BHK\b/i);
+  return m ? `${m[1]} BHK` : null;
 }
 
 function buildCards(rawListings, today) {
   const cards = rawListings.map(item => {
-    const date = parseDMY(item.startDate);
+    const date = item.auctionStart.day;
     const daysAway = daysBetween(today, date);
     const { locality, pin, hasSpecificLocality } = extractLocalityAndPin(item);
     const { category, subtype, cardType } = classify(item);
     const bhk = extractBhkPrefix(item);
+    const reserveCrore = item.reserveRupees / 1e7;
 
-    // Enrichment from the auction-notice page (each field null when unavailable)
-    const notice = item.notice || {};
-    const reserveExact = parseIndianAmount(notice['Reserve Price']);
-    if (reserveExact) item.reserveCrore = reserveExact / 1e7; // exact figure beats the search page's rounded "X.XX Crore"
-    const emdRupees = parseIndianAmount(notice['EMD']);
-    const emdStr = emdRupees ? fmtMoney(emdRupees) : null;
-    const emdEnd = parseNoticeDateTime(notice['EMD End date & time']);
-    const emdCloseStr = emdEnd ? `${fmtShortBadge(emdEnd.date)} ${emdEnd.date.getFullYear()}, ${emdEnd.time}` : null;
-    const aucStart = parseNoticeDateTime(notice['Auction Start Date & Time']);
-    const aucEnd = parseNoticeDateTime(notice['Auction End Date & Time']);
-    const auctionTimeStr = aucStart && aucEnd ? `${aucStart.time} – ${aucEnd.time} IST` : null;
-    const inspFrom = parseNoticeDateTime(notice['Inspection Date & Time From']);
-    const inspTo = parseNoticeDateTime(notice['Inspection Date & Time To']);
-    const inspectionStr = inspFrom && inspTo ? `${fmtShortBadge(inspFrom.date)} – ${fmtShortBadge(inspTo.date)} ${inspTo.date.getFullYear()}` : null;
-    const coords = parseCoordinates(notice['Property Address']);
+    // Each of these stays null when BaankNet leaves the underlying field blank, and the
+    // card simply omits that row.
+    const emdStr = item.emdRupees ? fmtMoney(item.emdRupees) : null;
+    const emdCloseStr = item.emdEnd
+      ? `${fmtShortBadge(item.emdEnd.day)} ${item.emdEnd.day.getFullYear()}, ${item.emdEnd.time}`
+      : null;
+    const auctionTimeStr = item.auctionEnd ? `${item.auctionStart.time} – ${item.auctionEnd.time} IST` : null;
+    const inspectionStr = item.inspectionFrom && item.inspectionTo
+      ? `${fmtShortBadge(item.inspectionFrom.day)} – ${fmtShortBadge(item.inspectionTo.day)} ${item.inspectionTo.day.getFullYear()}`
+      : null;
+    const coords = parseCoordinates(item.address);
 
     let badgeClass, badgeText, isUrgent = false;
     if (category === 'commercial') {
       badgeClass = 'badge-new'; badgeText = 'Mixed-Use';
-    } else if (item.reserveCrore >= 8) {
+    } else if (reserveCrore >= 8) {
       badgeClass = 'badge-new'; badgeText = 'High Value';
     } else if (daysAway <= 7) {
       badgeClass = 'badge-urgent'; badgeText = `${fmtShortBadge(date)} — Urgent`; isUrgent = true;
@@ -341,12 +320,12 @@ function buildCards(rawListings, today) {
 
     const titlePrefix = bhk ? `${bhk} ${subtype}` : subtype;
     const cardTitle = `${titlePrefix} — ${locality}`;
-    const reserveStr = `₹${item.reserveCrore.toFixed(2)} Cr`;
+    const reserveStr = `₹${reserveCrore.toFixed(2)} Cr`;
 
     return {
       category, cardType, subtype, cardTitle, locality, pin, hasSpecificLocality,
       bank: item.bank, reserveStr, dateStr: fmtLongDate(date),
-      auctionId: item.auctionId, badgeClass, badgeText, isUrgent, reserveCrore: item.reserveCrore,
+      auctionId: item.auctionId, badgeClass, badgeText, isUrgent, reserveCrore,
       auctionDate: date, emdStr, emdCloseStr, auctionTimeStr, inspectionStr, coords,
     };
   });
@@ -450,7 +429,7 @@ function buildStatsBlock(cards) {
   const banks = new Set(cards.map(c => c.bank));
   const lowest = Math.min(...cards.map(c => c.reserveCrore)).toFixed(2);
   const highest = Math.max(...cards.map(c => c.reserveCrore)).toFixed(2);
-  const now = new Date();
+  const now = istToday();
   const monthYear = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
   return `<div class="auction-stats">
         <div class="auction-stat"><strong>${cards.length}</strong> Active listings</div>
@@ -463,20 +442,25 @@ function buildStatsBlock(cards) {
 
 // -------------------- Main --------------------
 
+// Date-only, IST calendar day: "2026-09-05"
+function fmtApiDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 async function main() {
-  const today = new Date();
+  const today = istToday();
   const minDate = new Date(today);
   minDate.setDate(minDate.getDate() + MIN_DAYS_OUT);
-  const aucDateFrom = `${String(minDate.getDate()).padStart(2, '0')}-${String(minDate.getMonth() + 1).padStart(2, '0')}-${minDate.getFullYear()}`;
+  const auctionDateStart = fmtApiDate(minDate);
   // Keep a rolling ~18-month forward window so the range never goes stale between runs.
-  const aucDateTo = `31-12-${today.getFullYear() + 1}`;
+  const auctionDateEnd = `${today.getFullYear() + 1}-12-31`;
 
-  console.log(`Fetching BaankNet listings (date range ${aucDateFrom} to ${aucDateTo}) across ${BENGALURU_CITY_TARGETS.length} Bengaluru city entries...`);
-  const { token, cookie } = await fetchTokenAndCookie();
+  console.log(`Fetching BaankNet listings (date range ${auctionDateStart} to ${auctionDateEnd}) across ${BENGALURU_CITY_TARGETS.length} Bengaluru city entries...`);
 
   let listings = [];
   for (const target of BENGALURU_CITY_TARGETS) {
-    const cityListings = await fetchAllListingsForCity(token, cookie, aucDateFrom, aucDateTo, target.districtId, target.cityId);
+    const hits = await fetchAllListingsForCity(target.districtId, target.cityId, auctionDateStart, auctionDateEnd);
+    const cityListings = hits.map(normaliseListing).filter(Boolean);
     console.log(`  ${target.cityName} (district ${target.districtId}, city ${target.cityId}): ${cityListings.length} listing(s)`);
     listings = listings.concat(cityListings);
   }
@@ -491,39 +475,25 @@ async function main() {
   const dedupedCount = beforeDedupeCount - listings.length;
 
   const beforeSkipCount = listings.length;
-  listings = listings.filter(item => !SKIP_KEYWORDS.some(kw => item.title.toUpperCase().includes(kw)));
+  listings = listings.filter(item => {
+    const haystack = `${item.title} ${item.propertyType} ${item.propertySubType}`.toUpperCase();
+    return !SKIP_KEYWORDS.some(kw => haystack.includes(kw));
+  });
   const skippedNonRealEstate = beforeSkipCount - listings.length;
+
+  // A card can't be rendered without an auction date and a reserve price.
+  const beforeIncompleteCount = listings.length;
+  listings = listings.filter(item => item.auctionStart && item.reserveRupees);
+  const skippedIncomplete = beforeIncompleteCount - listings.length;
 
   // Defensive re-check: don't rely solely on BaankNet's own date filter for the 4-day gap.
   const beforeDateFilterCount = listings.length;
-  listings = listings.filter(item => daysBetween(today, parseDMY(item.startDate)) >= MIN_DAYS_OUT);
+  listings = listings.filter(item => daysBetween(today, item.auctionStart.day) >= MIN_DAYS_OUT);
   const skippedTooSoon = beforeDateFilterCount - listings.length;
 
   if (listings.length === 0) {
-    throw new Error('No listings parsed from BaankNet response — aborting without touching auctions.html');
+    throw new Error('No listings returned by BaankNet — aborting without touching auctions.html');
   }
-
-  // Enrich each listing from its auction-notice page (EMD, deadlines, times, inspection,
-  // authoritative property type, exact reserve, coordinates). Non-fatal per listing:
-  // a card falls back to search-level data if its notice can't be fetched.
-  let enriched = 0;
-  for (const item of listings) {
-    if (!item.noticeLink) continue;
-    try {
-      item.notice = await fetchNoticeDetails(cookie, item.noticeLink);
-      enriched++;
-    } catch (err) {
-      await sleep(500);
-      try {
-        item.notice = await fetchNoticeDetails(cookie, item.noticeLink);
-        enriched++;
-      } catch (err2) {
-        console.warn(`  WARNING: could not fetch auction notice for ${item.auctionId}: ${err2.message} — card will use search-level data only`);
-      }
-    }
-    await sleep(200); // stay polite to the portal
-  }
-  console.log(`Enriched ${enriched}/${listings.length} listings from auction-notice pages`);
 
   const cards = buildCards(listings, today);
   const cardsHtml = cards.map(cardHtml).join('\n\n');
@@ -544,7 +514,7 @@ async function main() {
 
   fs.writeFileSync(AUCTIONS_HTML_PATH, content, 'utf-8');
 
-  console.log(`Wrote ${cards.length} listings (${dedupedCount} duplicate(s) across city queries, ${skippedNonRealEstate} skipped as non-real-estate, ${skippedTooSoon} skipped as < ${MIN_DAYS_OUT} days out) to auctions.html`);
+  console.log(`Wrote ${cards.length} listings (${dedupedCount} duplicate(s) across city queries, ${skippedNonRealEstate} skipped as non-real-estate, ${skippedIncomplete} skipped as incomplete, ${skippedTooSoon} skipped as < ${MIN_DAYS_OUT} days out) to auctions.html`);
   console.log(`Banks: ${[...new Set(cards.map(c => c.bank))].join(', ')}`);
 }
 
